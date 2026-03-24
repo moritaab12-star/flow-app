@@ -20,6 +20,7 @@ import {
   type NodeProps,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { MobileProjectEditView } from "./mobile-project-edit-view";
 import {
   createContext,
   useCallback,
@@ -2049,7 +2050,7 @@ function ProjectListView({
   };
 
   const renderLocalCard = (p: ProjectRecord) => (
-    <div className="group flex flex-col gap-3 rounded-2xl border border-[#2e3544] bg-[#1a1d24] p-5 shadow-lg ring-1 ring-white/[0.05] transition hover:border-[#3d4a5c] sm:flex-row sm:items-start sm:justify-between">
+    <div className="group flex flex-col gap-3 rounded-2xl border border-[#2e3544] bg-[#1a1d24] p-5 shadow-lg ring-1 ring-white/[0.05] transition hover:border-[#3d4a5c] max-md:gap-4 max-md:p-6 md:flex-row md:items-start md:justify-between">
       {editingId === p.id ? (
         <>
           <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -2071,18 +2072,18 @@ function ProjectListView({
             <span className="text-xs text-zinc-500">
               更新: {formatUpdatedAt(p.updatedAt)}
             </span>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 max-md:flex-col max-md:gap-3">
               <button
                 type="button"
                 onClick={() => commitEdit(p.id)}
-                className="rounded-lg border border-[#3d4454] bg-[#262a34] px-3 py-1.5 text-xs font-medium text-zinc-200 transition hover:border-[#7c6bb0]/55"
+                className="rounded-lg border border-[#3d4454] bg-[#262a34] px-3 py-1.5 text-xs font-medium text-zinc-200 transition hover:border-[#7c6bb0]/55 max-md:w-full max-md:py-2.5"
               >
                 保存
               </button>
               <button
                 type="button"
                 onClick={cancelEdit}
-                className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-800/50"
+                className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-800/50 max-md:w-full max-md:py-2.5"
               >
                 キャンセル
               </button>
@@ -2091,7 +2092,7 @@ function ProjectListView({
           <button
             type="button"
             onClick={() => onDelete(p.id)}
-            className="shrink-0 rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300"
+            className="shrink-0 rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300 max-md:w-full max-md:py-2.5"
           >
             削除
           </button>
@@ -2104,7 +2105,7 @@ function ProjectListView({
             className="min-w-0 flex-1 text-left"
           >
             <span className="flex flex-wrap items-center gap-2">
-              <span className="block truncate text-base font-semibold text-zinc-100 group-hover:text-[#c4b5fd]">
+              <span className="block min-w-0 truncate text-base font-semibold text-zinc-100 group-hover:text-[#c4b5fd] max-md:whitespace-normal max-md:break-words max-md:overflow-visible">
                 {p.name}
               </span>
               <span className="shrink-0 rounded bg-zinc-800/90 px-1.5 py-0.5 text-[10px] font-medium text-zinc-400 ring-1 ring-zinc-600/50">
@@ -2115,14 +2116,14 @@ function ProjectListView({
               更新: {formatUpdatedAt(p.updatedAt)}
             </span>
           </button>
-          <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex shrink-0 flex-col gap-2 max-md:w-full md:flex-row md:items-center">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 startEdit(p);
               }}
-              className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-[#7c6bb0]/55 hover:text-zinc-100"
+              className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-[#7c6bb0]/55 hover:text-zinc-100 max-md:w-full max-md:py-2.5"
             >
               編集
             </button>
@@ -2132,7 +2133,7 @@ function ProjectListView({
                 e.stopPropagation();
                 onDelete(p.id);
               }}
-              className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300"
+              className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300 max-md:w-full max-md:py-2.5"
             >
               削除
             </button>
@@ -2143,30 +2144,30 @@ function ProjectListView({
   );
 
   return (
-    <div className="min-h-dvh bg-[#0f1115] px-4 py-10 sm:px-8">
+    <div className="min-h-dvh bg-[#0f1115] px-4 py-10 max-md:px-5 max-md:py-12 md:px-8">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-8 flex flex-col gap-4 max-md:gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-100">
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 max-md:break-words">
               プロジェクト
             </h1>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-zinc-500 max-md:break-words">
               Airtable の一覧を優先して表示します（ローカルのみの項目は下に並びます）
             </p>
           </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <div className="flex max-md:w-full max-md:flex-col max-md:gap-3 shrink-0 flex-wrap items-center gap-2">
             <button
               type="button"
               disabled={airtableListLoading}
               onClick={onRefreshAirtableList}
-              className="rounded-xl border border-[#2d4a3d] bg-[#14221c]/90 px-4 py-2.5 text-sm font-medium text-emerald-200/90 shadow-md ring-1 ring-emerald-900/25 transition hover:border-emerald-600/45 hover:text-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl border border-[#2d4a3d] bg-[#14221c]/90 px-4 py-2.5 text-sm font-medium text-emerald-200/90 shadow-md ring-1 ring-emerald-900/25 transition hover:border-emerald-600/45 hover:text-emerald-100 disabled:cursor-not-allowed disabled:opacity-50 max-md:w-full max-md:py-3"
             >
               {airtableListLoading ? "取得中…" : "Airtable一覧を再取得"}
             </button>
             <button
               type="button"
               onClick={onNew}
-              className="rounded-xl border border-[#3d4454] bg-[#1a1d24] px-5 py-2.5 text-sm font-medium text-zinc-100 shadow-md ring-1 ring-white/[0.06] transition hover:border-[#7c6bb0]/65 hover:bg-[#22262f]"
+              className="rounded-xl border border-[#3d4454] bg-[#1a1d24] px-5 py-2.5 text-sm font-medium text-zinc-100 shadow-md ring-1 ring-white/[0.06] transition hover:border-[#7c6bb0]/65 hover:bg-[#22262f] max-md:w-full max-md:py-3"
             >
               新規作成
             </button>
@@ -2174,14 +2175,14 @@ function ProjectListView({
         </div>
 
         {airtableListLoading ? (
-          <p className="mb-4 rounded-xl border border-[#2e3544] bg-[#151820] px-4 py-3 text-sm text-zinc-400">
+          <p className="mb-4 rounded-xl border border-[#2e3544] bg-[#151820] px-4 py-3 text-sm text-zinc-400 max-md:px-5 max-md:py-4 max-md:break-words">
             Airtable からプロジェクト一覧を読み込み中…
           </p>
         ) : null}
         {airtableListError ? (
           <p
             role="alert"
-            className="mb-4 rounded-xl border border-amber-900/40 bg-amber-950/25 px-4 py-3 text-sm text-amber-200/90"
+            className="mb-4 rounded-xl border border-amber-900/40 bg-amber-950/25 px-4 py-3 text-sm text-amber-200/90 max-md:px-5 max-md:py-4 max-md:break-words"
           >
             Airtable 一覧の取得に失敗しました: {airtableListError}
           </p>
@@ -2189,14 +2190,14 @@ function ProjectListView({
         {listOpenError ? (
           <p
             role="alert"
-            className="mb-4 rounded-xl border border-red-900/40 bg-red-950/25 px-4 py-3 text-sm text-red-200/90"
+            className="mb-4 rounded-xl border border-red-900/40 bg-red-950/25 px-4 py-3 text-sm text-red-200/90 max-md:px-5 max-md:py-4 max-md:break-words"
           >
             {listOpenError}
           </p>
         ) : null}
 
         {listEntries.length === 0 && !airtableListLoading ? (
-          <p className="rounded-2xl border border-dashed border-[#2e3544] bg-[#151820] px-6 py-12 text-center text-sm text-zinc-500">
+          <p className="rounded-2xl border border-dashed border-[#2e3544] bg-[#151820] px-6 py-12 text-center text-sm text-zinc-500 max-md:px-5 max-md:py-14 max-md:break-words">
             プロジェクトがありません。Airtable に保存済みのプロジェクトがあれば「Airtable一覧を再取得」を押すか、「新規作成」から始めてください。
           </p>
         ) : listEntries.length > 0 ? (
@@ -2214,7 +2215,7 @@ function ProjectListView({
               const rowBusy = openingAirtableId === a.id;
               return (
                 <li key={`airtable-${a.id}`}>
-                  <div className="group flex flex-col gap-3 rounded-2xl border border-[#2e3544] bg-[#1a1d24] p-5 shadow-lg ring-1 ring-white/[0.05] transition hover:border-[#3d4a5c] sm:flex-row sm:items-start sm:justify-between">
+                  <div className="group flex flex-col gap-3 rounded-2xl border border-[#2e3544] bg-[#1a1d24] p-5 shadow-lg ring-1 ring-white/[0.05] transition hover:border-[#3d4a5c] max-md:gap-4 max-md:p-6 md:flex-row md:items-start md:justify-between">
                     {pLocal && editingId === pLocal.id ? (
                       <>
                         <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -2237,18 +2238,18 @@ function ProjectListView({
                             更新（ローカル）:{" "}
                             {formatUpdatedAt(pLocal.updatedAt)}
                           </span>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-2 max-md:flex-col max-md:gap-3">
                             <button
                               type="button"
                               onClick={() => commitEdit(pLocal.id)}
-                              className="rounded-lg border border-[#3d4454] bg-[#262a34] px-3 py-1.5 text-xs font-medium text-zinc-200 transition hover:border-[#7c6bb0]/55"
+                              className="rounded-lg border border-[#3d4454] bg-[#262a34] px-3 py-1.5 text-xs font-medium text-zinc-200 transition hover:border-[#7c6bb0]/55 max-md:w-full max-md:py-2.5"
                             >
                               保存
                             </button>
                             <button
                               type="button"
                               onClick={cancelEdit}
-                              className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-800/50"
+                              className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-800/50 max-md:w-full max-md:py-2.5"
                             >
                               キャンセル
                             </button>
@@ -2257,7 +2258,7 @@ function ProjectListView({
                         <button
                           type="button"
                           onClick={() => onDelete(pLocal.id)}
-                          className="shrink-0 rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300"
+                          className="shrink-0 rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300 max-md:w-full max-md:py-2.5"
                         >
                           削除
                         </button>
@@ -2271,7 +2272,7 @@ function ProjectListView({
                           className="min-w-0 flex-1 text-left disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <span className="flex flex-wrap items-center gap-2">
-                            <span className="block truncate text-base font-semibold text-zinc-100 group-hover:text-[#c4b5fd]">
+                            <span className="block min-w-0 truncate text-base font-semibold text-zinc-100 group-hover:text-[#c4b5fd] max-md:whitespace-normal max-md:break-words max-md:overflow-visible">
                               {a.name}
                             </span>
                             <span className="shrink-0 rounded bg-emerald-950/80 px-1.5 py-0.5 text-[10px] font-medium text-emerald-300/90 ring-1 ring-emerald-800/50">
@@ -2299,7 +2300,7 @@ function ProjectListView({
                             </span>
                           ) : null}
                         </button>
-                        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
+                        <div className="flex shrink-0 flex-col gap-2 max-md:w-full md:flex-row md:items-center">
                           {pLocal ? (
                             <>
                               <button
@@ -2308,7 +2309,7 @@ function ProjectListView({
                                   e.stopPropagation();
                                   startEdit(pLocal);
                                 }}
-                                className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-[#7c6bb0]/55 hover:text-zinc-100"
+                                className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-[#7c6bb0]/55 hover:text-zinc-100 max-md:w-full max-md:py-2.5"
                               >
                                 編集
                               </button>
@@ -2318,7 +2319,7 @@ function ProjectListView({
                                   e.stopPropagation();
                                   onDelete(pLocal.id);
                                 }}
-                                className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300"
+                                className="rounded-lg border border-[#3d4454] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300 max-md:w-full max-md:py-2.5"
                               >
                                 削除
                               </button>
@@ -3017,6 +3018,17 @@ export default function Home() {
     [setNodes, setEdges],
   );
 
+  /** md 未満ではマウントしない（display:none 内で React Flow が警告を出すのを防ぐ） */
+  const [desktopFlowMounted, setDesktopFlowMounted] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 768px)");
+    const apply = () => setDesktopFlowMounted(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
   if (view === "list") {
     return (
       <ProjectListView
@@ -3038,14 +3050,6 @@ export default function Home() {
   return (
     <SetNodesContext.Provider value={setNodes}>
       <DeleteFlowCardContext.Provider value={deleteFlowCard}>
-      <div className="flex h-dvh w-full bg-[#0f1115]">
-        {activeProjectId ? (
-          <DeferredExecuteSidebar
-            cards={activeProject?.deferredCards ?? []}
-            onCardsChange={updateDeferredCards}
-          />
-        ) : null}
-        <div className="relative min-h-0 min-w-0 flex-1">
         {airtableSaveToast ? (
           <div
             role="status"
@@ -3054,96 +3058,147 @@ export default function Home() {
             保存しました
           </div>
         ) : null}
-        <div className="absolute right-4 top-4 z-20 flex flex-col items-end gap-2">
-          {diagnoseOutput && !diagnosePanelOpen ? (
-            <button
-              type="button"
-              onClick={() => setDiagnosePanelOpen(true)}
-              className="rounded-lg border border-[#5b4a8a]/45 bg-[#2a2540]/90 px-2.5 py-1.5 text-[11px] font-medium text-[#ddd6fe] shadow-md ring-1 ring-[#8b5cf6]/20 transition hover:border-[#a78bfa]/55 hover:text-white"
-            >
-              診断結果を見る
-            </button>
-          ) : null}
-          <button
-            type="button"
-            disabled={diagnoseLoading}
-            onClick={runDiagnose}
-            className="rounded-lg border border-[#3d4454] bg-[#1a1d24]/95 px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 shadow-md ring-1 ring-white/[0.05] transition hover:border-[#7c6bb0]/55 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {diagnoseLoading ? "診断中…" : "診断する"}
-          </button>
-          <button
-            type="button"
-            disabled={airtableBusy !== null}
-            onClick={loadProjectFromAirtable}
-            className="rounded-lg border border-[#2d4a3d] bg-[#14221c]/95 px-2.5 py-1.5 text-[11px] font-medium text-emerald-200/90 shadow-md ring-1 ring-emerald-900/30 transition hover:border-emerald-600/45 hover:text-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {airtableBusy === "load" ? "読込中…" : "Airtableから読込"}
-          </button>
-          {airtableLoadNotice ? (
-            <p
-              role="status"
-              className={`max-w-[14rem] text-right text-[10px] leading-snug ${
-                airtableLoadNotice === "Airtable から読み込みました"
-                  ? "text-emerald-200/85"
-                  : "text-red-300/90"
-              }`}
-            >
-              {airtableLoadNotice}
-            </p>
-          ) : null}
-          <button
-            type="button"
-            onClick={clearCurrentCanvas}
-            className="rounded-lg border border-[#3d4454] bg-[#1a1d24]/95 px-2.5 py-1.5 text-[11px] font-medium text-zinc-400 shadow-md ring-1 ring-white/[0.05] transition hover:border-[#7c6bb0]/55 hover:text-zinc-200"
-          >
-            キャンバスをクリア
-          </button>
-        </div>
-        <ReactFlow
-          className="!bg-[#0f1115] h-full w-full"
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          isValidConnection={isValidConnection}
-          connectionLineType={ConnectionLineType.SmoothStep}
-          connectionLineStyle={{ stroke: "#a78bfa", strokeWidth: 2 }}
-          nodeTypes={nodeTypes}
-          colorMode="dark"
-          fitView={false}
-          minZoom={0.12}
-          maxZoom={2}
-          defaultEdgeOptions={{
-            type: "smoothstep",
-            style: { stroke: "#a78bfa", strokeWidth: 2 },
-          }}
-        >
-          <Background
-            variant={BackgroundVariant.Dots}
-            gap={22}
-            size={1.1}
-            color="rgba(255,255,255,0.09)"
-          />
-          {activeProjectId ? (
-            <ProjectEditHeaderPanel
-              name={activeProject?.name ?? ""}
-              onRename={(n) => renameProject(activeProjectId, n)}
+
+        {activeProjectId ? (
+          <div className="flex h-dvh w-full flex-col bg-[#0f1115] md:hidden">
+            <MobileProjectEditView
+              projectName={activeProject?.name ?? ""}
+              onRenameProject={(n) => renameProject(activeProjectId, n)}
               sharedPromptMemo={activeProject?.sharedPromptMemo ?? ""}
               onSharedPromptMemoChange={updateSharedPromptMemo}
+              deferredCards={activeProject?.deferredCards ?? []}
+              onDeferredChange={updateDeferredCards}
+              onAddDeferredCard={addDeferredCard}
+              nodes={nodes as Node[]}
+              setNodes={setNodes as Dispatch<SetStateAction<Node[]>>}
+              deleteFlowCard={deleteFlowCard}
+              goBackToList={goBackToList}
+              runDiagnose={runDiagnose}
+              diagnoseLoading={diagnoseLoading}
+              saveProjectToAirtable={saveProjectToAirtable}
+              airtableBusy={airtableBusy}
+              loadProjectFromAirtable={loadProjectFromAirtable}
+              clearCurrentCanvas={clearCurrentCanvas}
+              airtableLoadNotice={airtableLoadNotice}
+              airtableSaveError={airtableSaveError}
+              airtableLastSavedLabel={formatAirtableSavedAt(
+                airtableLastSavedIso,
+              )}
+              onOpenDiagnosePanel={() => setDiagnosePanelOpen(true)}
+              hasDiagnoseOutput={Boolean(diagnoseOutput?.trim())}
+            />
+          </div>
+        ) : null}
+
+        <div className="hidden h-dvh w-full flex-row bg-[#0f1115] md:flex">
+          {activeProjectId ? (
+            <DeferredExecuteSidebar
+              cards={activeProject?.deferredCards ?? []}
+              onCardsChange={updateDeferredCards}
             />
           ) : null}
-          <EditTopLeftPanel
-            onBack={goBackToList}
-            onAddDeferredCard={addDeferredCard}
-            onAirtableSave={saveProjectToAirtable}
-            airtableSaveBusy={airtableBusy === "save"}
-            airtableSaveDisabled={airtableBusy !== null}
-            airtableLastSavedLabel={formatAirtableSavedAt(airtableLastSavedIso)}
-            airtableSaveError={airtableSaveError}
-          />
-        </ReactFlow>
+          <div className="relative min-h-0 min-w-0 flex-1 overflow-x-hidden">
+            <div className="absolute right-4 top-4 z-20 flex flex-col items-end gap-2">
+              {diagnoseOutput && !diagnosePanelOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setDiagnosePanelOpen(true)}
+                  className="rounded-lg border border-[#5b4a8a]/45 bg-[#2a2540]/90 px-2.5 py-1.5 text-[11px] font-medium text-[#ddd6fe] shadow-md ring-1 ring-[#8b5cf6]/20 transition hover:border-[#a78bfa]/55 hover:text-white"
+                >
+                  診断結果を見る
+                </button>
+              ) : null}
+              <button
+                type="button"
+                disabled={diagnoseLoading}
+                onClick={runDiagnose}
+                className="rounded-lg border border-[#3d4454] bg-[#1a1d24]/95 px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 shadow-md ring-1 ring-white/[0.05] transition hover:border-[#7c6bb0]/55 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {diagnoseLoading ? "診断中…" : "診断する"}
+              </button>
+              <button
+                type="button"
+                disabled={airtableBusy !== null}
+                onClick={loadProjectFromAirtable}
+                className="rounded-lg border border-[#2d4a3d] bg-[#14221c]/95 px-2.5 py-1.5 text-[11px] font-medium text-emerald-200/90 shadow-md ring-1 ring-emerald-900/30 transition hover:border-emerald-600/45 hover:text-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {airtableBusy === "load" ? "読込中…" : "Airtableから読込"}
+              </button>
+              {airtableLoadNotice ? (
+                <p
+                  role="status"
+                  className={`max-w-[14rem] text-right text-[10px] leading-snug ${
+                    airtableLoadNotice === "Airtable から読み込みました"
+                      ? "text-emerald-200/85"
+                      : "text-red-300/90"
+                  }`}
+                >
+                  {airtableLoadNotice}
+                </p>
+              ) : null}
+              <button
+                type="button"
+                onClick={clearCurrentCanvas}
+                className="rounded-lg border border-[#3d4454] bg-[#1a1d24]/95 px-2.5 py-1.5 text-[11px] font-medium text-zinc-400 shadow-md ring-1 ring-white/[0.05] transition hover:border-[#7c6bb0]/55 hover:text-zinc-200"
+              >
+                キャンバスをクリア
+              </button>
+            </div>
+            {desktopFlowMounted ? (
+              <ReactFlow
+                className="!bg-[#0f1115] h-full w-full"
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                isValidConnection={isValidConnection}
+                connectionLineType={ConnectionLineType.SmoothStep}
+                connectionLineStyle={{ stroke: "#a78bfa", strokeWidth: 2 }}
+                nodeTypes={nodeTypes}
+                colorMode="dark"
+                fitView={false}
+                minZoom={0.12}
+                maxZoom={2}
+                defaultEdgeOptions={{
+                  type: "smoothstep",
+                  style: { stroke: "#a78bfa", strokeWidth: 2 },
+                }}
+              >
+                <Background
+                  variant={BackgroundVariant.Dots}
+                  gap={22}
+                  size={1.1}
+                  color="rgba(255,255,255,0.09)"
+                />
+                {activeProjectId ? (
+                  <ProjectEditHeaderPanel
+                    name={activeProject?.name ?? ""}
+                    onRename={(n) => renameProject(activeProjectId, n)}
+                    sharedPromptMemo={activeProject?.sharedPromptMemo ?? ""}
+                    onSharedPromptMemoChange={updateSharedPromptMemo}
+                  />
+                ) : null}
+                <EditTopLeftPanel
+                  onBack={goBackToList}
+                  onAddDeferredCard={addDeferredCard}
+                  onAirtableSave={saveProjectToAirtable}
+                  airtableSaveBusy={airtableBusy === "save"}
+                  airtableSaveDisabled={airtableBusy !== null}
+                  airtableLastSavedLabel={formatAirtableSavedAt(
+                    airtableLastSavedIso,
+                  )}
+                  airtableSaveError={airtableSaveError}
+                />
+              </ReactFlow>
+            ) : (
+              <div
+                className="h-full w-full bg-[#0f1115]"
+                aria-hidden
+              />
+            )}
+          </div>
+        </div>
 
         {diagnosePanelOpen ? (
           <>
@@ -3207,8 +3262,6 @@ export default function Home() {
             </aside>
           </>
         ) : null}
-        </div>
-      </div>
       </DeleteFlowCardContext.Provider>
     </SetNodesContext.Provider>
   );
