@@ -4,10 +4,12 @@ import type { Node } from "@xyflow/react";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type Dispatch,
+  type MutableRefObject,
   type PointerEvent,
   type SetStateAction,
 } from "react";
@@ -75,6 +77,12 @@ function titleFromNode(n: Node): string {
 const MOBILE_CARD_W = 260;
 const MOBILE_CARD_H = 86;
 const MOBILE_CANVAS_PAD = 40;
+/** 仮想キャンバスの最小辺（フロー座標 px） */
+const MOBILE_VIRTUAL_MIN = 2800;
+/** ビューポートに対する仮想キャンバス倍率（横・縦） */
+const MOBILE_VIEWPORT_CANVAS_MULT = 4;
+const MOBILE_ZOOM_MIN = 0.3;
+const MOBILE_ZOOM_MAX = 2.75;
 
 function mobileCanvasBounds(nodes: Node[]): { w: number; h: number } {
   let w = 360;
@@ -88,14 +96,30 @@ function mobileCanvasBounds(nodes: Node[]): { w: number; h: number } {
   return { w, h };
 }
 
+function mobileVirtualCanvasSize(
+  nodes: Node[],
+  viewportW: number,
+  viewportH: number,
+): { w: number; h: number } {
+  const b = mobileCanvasBounds(nodes);
+  const vw = Math.max(viewportW, 280);
+  const vh = Math.max(viewportH, 240);
+  return {
+    w: Math.max(b.w, MOBILE_VIRTUAL_MIN, vw * MOBILE_VIEWPORT_CANVAS_MULT),
+    h: Math.max(b.h, MOBILE_VIRTUAL_MIN, vh * MOBILE_VIEWPORT_CANVAS_MULT),
+  };
+}
+
 function MobileCanvasCard({
   node,
   setNodes,
   onOpenEdit,
+  flowScaleRef,
 }: {
   node: Node;
   setNodes: Dispatch<SetStateAction<Node[]>>;
   onOpenEdit: () => void;
+  flowScaleRef: MutableRefObject<number>;
 }) {
   const dragRef = useRef<{
     active: boolean;
@@ -124,8 +148,9 @@ function MobileCanvasCard({
   const onHandlePointerMove = (e: PointerEvent) => {
     const d = dragRef.current;
     if (!d?.active) return;
-    const nx = d.originX + (e.clientX - d.startClientX);
-    const ny = d.originY + (e.clientY - d.startClientY);
+    const s = Math.max(flowScaleRef.current ?? 1, 0.12);
+    const nx = d.originX + (e.clientX - d.startClientX) / s;
+    const ny = d.originY + (e.clientY - d.startClientY) / s;
     setNodes((nds) =>
       nds.map((n) =>
         n.id === node.id ? { ...n, position: { x: nx, y: ny } } : n,
@@ -146,6 +171,7 @@ function MobileCanvasCard({
 
   return (
     <div
+      data-mobile-card-root
       className="absolute z-[2] rounded-xl border border-[#2e3544] bg-[#1a1d24] shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-1 ring-white/[0.05]"
       style={{
         left: px,
@@ -181,6 +207,186 @@ function MobileCanvasCard({
           {titleFromNode(node)}
         </span>
       </button>
+    </div>
+  );
+}
+
+function MobileVirtualCanvas({
+  nodes,
+  sorted,
+  setNodes,
+  onOpenEdit,
+}: {
+  nodes: Node[];
+  sorted: Node[];
+  setNodes: Dispatch<SetStateAction<Node[]>>;
+  onOpenEdit: (node: Node) => void;
+}) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [vp, setVp] = useState({ w: 360, h: 400 });
+  const [scale, setScale] = useState(1);
+  const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
+  const flowScaleRef = useRef(1);
+  flowScaleRef.current = scale;
+
+  const virtual = useMemo(
+    () => mobileVirtualCanvasSize(nodes, vp.w, vp.h),
+    [nodes, vp.w, vp.h],
+  );
+
+  const viewRef = useRef({ panX: 0, panY: 0, scale: 1 });
+  viewRef.current = { panX, panY, scale };
+
+  useLayoutEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const apply = () => {
+      const r = el.getBoundingClientRect();
+      setVp({ w: r.width, h: r.height });
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const panOneRef = useRef<{
+    active: boolean;
+    startLX: number;
+    startLY: number;
+    origPanX: number;
+    origPanY: number;
+  } | null>(null);
+
+  const pinchRef = useRef<{ lastDist: number } | null>(null);
+
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+
+    const localPoint = (cx: number, cy: number) => {
+      const r = el.getBoundingClientRect();
+      return { x: cx - r.left, y: cy - r.top };
+    };
+
+    const onCard = (target: EventTarget | null) =>
+      target instanceof Element &&
+      Boolean(target.closest("[data-mobile-card-root]"));
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        panOneRef.current = null;
+        pinchRef.current = null;
+      } else if (e.touches.length === 1 && !onCard(e.target)) {
+        const p = localPoint(e.touches[0].clientX, e.touches[0].clientY);
+        const v = viewRef.current;
+        panOneRef.current = {
+          active: true,
+          startLX: p.x,
+          startLY: p.y,
+          origPanX: v.panX,
+          origPanY: v.panY,
+        };
+        pinchRef.current = null;
+      }
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        if (
+          onCard(e.touches[0].target) ||
+          onCard(e.touches[1].target)
+        ) {
+          return;
+        }
+        e.preventDefault();
+        panOneRef.current = null;
+        const t1 = localPoint(e.touches[0].clientX, e.touches[0].clientY);
+        const t2 = localPoint(e.touches[1].clientX, e.touches[1].clientY);
+        const dist = Math.hypot(t2.x - t1.x, t2.y - t1.y);
+        const midX = (t1.x + t2.x) / 2;
+        const midY = (t1.y + t2.y) / 2;
+        if (dist < 10) return;
+
+        const v = viewRef.current;
+        if (!pinchRef.current) {
+          pinchRef.current = { lastDist: dist };
+          return;
+        }
+
+        const scaleFactor = dist / pinchRef.current.lastDist;
+        let newScale = v.scale * scaleFactor;
+        newScale = Math.min(
+          MOBILE_ZOOM_MAX,
+          Math.max(MOBILE_ZOOM_MIN, newScale),
+        );
+
+        const wx = (midX - v.panX) / v.scale;
+        const wy = (midY - v.panY) / v.scale;
+        const newPanX = midX - wx * newScale;
+        const newPanY = midY - wy * newScale;
+
+        pinchRef.current = { lastDist: dist };
+        setScale(newScale);
+        setPanX(newPanX);
+        setPanY(newPanY);
+      } else if (e.touches.length === 1 && panOneRef.current?.active) {
+        e.preventDefault();
+        const p = localPoint(e.touches[0].clientX, e.touches[0].clientY);
+        const o = panOneRef.current;
+        setPanX(o.origPanX + (p.x - o.startLX));
+        setPanY(o.origPanY + (p.y - o.startLY));
+      }
+    };
+
+    const endPanPinch = (e: TouchEvent) => {
+      if (e.touches.length < 2) pinchRef.current = null;
+      if (e.touches.length === 0) panOneRef.current = null;
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", endPanPinch);
+    el.addEventListener("touchcancel", endPanPinch);
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", endPanPinch);
+      el.removeEventListener("touchcancel", endPanPinch);
+    };
+  }, []);
+
+  return (
+    <div className="mb-2 flex flex-col gap-1.5">
+      <div
+        ref={viewportRef}
+        className="relative h-[min(56vh,28rem)] w-full touch-none overflow-hidden rounded-xl border border-[#2e3544]/60 bg-[#050608] shadow-inner"
+      >
+        <div
+          className="relative will-change-transform"
+          style={{
+            width: virtual.w,
+            height: virtual.h,
+            transform: `translate(${panX}px, ${panY}px) scale(${scale})`,
+            transformOrigin: "0 0",
+          }}
+        >
+          {sorted.map((n) => (
+            <MobileCanvasCard
+              key={n.id}
+              node={n}
+              setNodes={setNodes}
+              flowScaleRef={flowScaleRef}
+              onOpenEdit={() => onOpenEdit(n)}
+            />
+          ))}
+        </div>
+      </div>
+      <p className="px-0.5 text-[10px] leading-snug text-zinc-600">
+        拡大 {Math.round(scale * 100)}% · 空白ドラッグで移動 · 2本指でピンチ
+      </p>
     </div>
   );
 }
@@ -242,7 +448,6 @@ export function MobileProjectEditView({
   }, []);
 
   const sorted = useMemo(() => sortCanvasNodes(nodes), [nodes]);
-  const canvasBounds = useMemo(() => mobileCanvasBounds(nodes), [nodes]);
   const selected = useMemo(
     () => (selectedId ? nodes.find((n) => n.id === selectedId) ?? null : null),
     [nodes, selectedId],
@@ -419,34 +624,22 @@ export function MobileProjectEditView({
           キャンバス上のカード
         </h2>
         <p className="mb-2 text-[10px] leading-snug text-zinc-500">
-          上部の「⠿」エリアをドラッグして位置を変えられます。タイトル行をタップすると全画面の編集が開きます。スクロールでキャンバス全体を見渡せます。
+          作業エリアは画面より広い仮想キャンバスです。上部「⠿」をドラッグでカード移動（1本指）、空白のドラッグで見え方の移動、2本指ピンチで拡大縮小できます。タイトル行をタップで全画面編集です。
         </p>
         {nodes.length === 0 ? (
           <p className="text-sm text-zinc-600">
             カードがありません。「操作を開く」から追加してください。
           </p>
         ) : (
-          <div className="mb-2 h-[min(52vh,26rem)] w-full overflow-auto overscroll-contain rounded-xl border border-[#2e3544]/60 bg-[#080a0f] shadow-inner [-webkit-overflow-scrolling:touch]">
-            <div
-              className="relative min-h-full min-w-full"
-              style={{
-                width: Math.max(canvasBounds.w, 320),
-                height: Math.max(canvasBounds.h, 280),
-              }}
-            >
-              {sorted.map((n) => (
-                <MobileCanvasCard
-                  key={n.id}
-                  node={n}
-                  setNodes={setNodes}
-                  onOpenEdit={() => {
-                    closeActionPanel();
-                    setSelectedId(n.id);
-                  }}
-                />
-              ))}
-            </div>
-          </div>
+          <MobileVirtualCanvas
+            nodes={nodes}
+            sorted={sorted}
+            setNodes={setNodes}
+            onOpenEdit={(n) => {
+              closeActionPanel();
+              setSelectedId(n.id);
+            }}
+          />
         )}
       </div>
 
