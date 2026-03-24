@@ -3018,9 +3018,9 @@ export default function Home() {
     [setNodes, setEdges],
   );
 
-  /** md 未満ではマウントしない（display:none 内で React Flow が警告を出すのを防ぐ） */
+  /** md 以上のときだけデスクトップ編集 UI（React Flow 含む）をマウント。スマホでは DOM に載せない */
   const [desktopFlowMounted, setDesktopFlowMounted] = useState(false);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof window === "undefined") return;
     const mq = window.matchMedia("(min-width: 768px)");
     const apply = () => setDesktopFlowMounted(mq.matches);
@@ -3059,8 +3059,8 @@ export default function Home() {
           </div>
         ) : null}
 
-        {activeProjectId ? (
-          <div className="flex h-dvh w-full flex-col bg-[#0f1115] md:hidden">
+        {activeProjectId && !desktopFlowMounted ? (
+          <div className="flex h-dvh w-full flex-col bg-[#0f1115]">
             <MobileProjectEditView
               projectName={activeProject?.name ?? ""}
               onRenameProject={(n) => renameProject(activeProjectId, n)}
@@ -3090,7 +3090,8 @@ export default function Home() {
           </div>
         ) : null}
 
-        <div className="hidden h-dvh w-full flex-row bg-[#0f1115] md:flex">
+        {desktopFlowMounted ? (
+        <div className="flex h-dvh w-full flex-row bg-[#0f1115]">
           {activeProjectId ? (
             <DeferredExecuteSidebar
               cards={activeProject?.deferredCards ?? []}
@@ -3144,61 +3145,55 @@ export default function Home() {
                 キャンバスをクリア
               </button>
             </div>
-            {desktopFlowMounted ? (
-              <ReactFlow
-                className="!bg-[#0f1115] h-full w-full"
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                isValidConnection={isValidConnection}
-                connectionLineType={ConnectionLineType.SmoothStep}
-                connectionLineStyle={{ stroke: "#a78bfa", strokeWidth: 2 }}
-                nodeTypes={nodeTypes}
-                colorMode="dark"
-                fitView={false}
-                minZoom={0.12}
-                maxZoom={2}
-                defaultEdgeOptions={{
-                  type: "smoothstep",
-                  style: { stroke: "#a78bfa", strokeWidth: 2 },
-                }}
-              >
-                <Background
-                  variant={BackgroundVariant.Dots}
-                  gap={22}
-                  size={1.1}
-                  color="rgba(255,255,255,0.09)"
-                />
-                {activeProjectId ? (
-                  <ProjectEditHeaderPanel
-                    name={activeProject?.name ?? ""}
-                    onRename={(n) => renameProject(activeProjectId, n)}
-                    sharedPromptMemo={activeProject?.sharedPromptMemo ?? ""}
-                    onSharedPromptMemoChange={updateSharedPromptMemo}
-                  />
-                ) : null}
-                <EditTopLeftPanel
-                  onBack={goBackToList}
-                  onAddDeferredCard={addDeferredCard}
-                  onAirtableSave={saveProjectToAirtable}
-                  airtableSaveBusy={airtableBusy === "save"}
-                  airtableSaveDisabled={airtableBusy !== null}
-                  airtableLastSavedLabel={formatAirtableSavedAt(
-                    airtableLastSavedIso,
-                  )}
-                  airtableSaveError={airtableSaveError}
-                />
-              </ReactFlow>
-            ) : (
-              <div
-                className="h-full w-full bg-[#0f1115]"
-                aria-hidden
+            <ReactFlow
+              className="!bg-[#0f1115] h-full w-full"
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              isValidConnection={isValidConnection}
+              connectionLineType={ConnectionLineType.SmoothStep}
+              connectionLineStyle={{ stroke: "#a78bfa", strokeWidth: 2 }}
+              nodeTypes={nodeTypes}
+              colorMode="dark"
+              fitView={false}
+              minZoom={0.12}
+              maxZoom={2}
+              defaultEdgeOptions={{
+                type: "smoothstep",
+                style: { stroke: "#a78bfa", strokeWidth: 2 },
+              }}
+            >
+              <Background
+                variant={BackgroundVariant.Dots}
+                gap={22}
+                size={1.1}
+                color="rgba(255,255,255,0.09)"
               />
-            )}
+              {activeProjectId ? (
+                <ProjectEditHeaderPanel
+                  name={activeProject?.name ?? ""}
+                  onRename={(n) => renameProject(activeProjectId, n)}
+                  sharedPromptMemo={activeProject?.sharedPromptMemo ?? ""}
+                  onSharedPromptMemoChange={updateSharedPromptMemo}
+                />
+              ) : null}
+              <EditTopLeftPanel
+                onBack={goBackToList}
+                onAddDeferredCard={addDeferredCard}
+                onAirtableSave={saveProjectToAirtable}
+                airtableSaveBusy={airtableBusy === "save"}
+                airtableSaveDisabled={airtableBusy !== null}
+                airtableLastSavedLabel={formatAirtableSavedAt(
+                  airtableLastSavedIso,
+                )}
+                airtableSaveError={airtableSaveError}
+              />
+            </ReactFlow>
           </div>
         </div>
+        ) : null}
 
         {diagnosePanelOpen ? (
           <>
